@@ -1,6 +1,6 @@
 import { extend } from "../shared"
 
-let shouldTrack:any
+let shouldTrack: any
 let activeEffect: ReactiveEffect
 
 class ReactiveEffect {
@@ -12,8 +12,8 @@ class ReactiveEffect {
         this._fn = fn
     }
     run() {
-        
-        if(!this.active){
+
+        if (!this.active) {
             return this._fn()
         }
         shouldTrack = true
@@ -36,7 +36,7 @@ class ReactiveEffect {
 export function effect(fn: any, options: any = {}) {
     const { scheduler } = options
     const _effect = new ReactiveEffect(fn, scheduler)
-    extend(_effect,options)
+    extend(_effect, options)
     _effect.run()
     const runner: any = _effect.run.bind(_effect)
     runner.effect = _effect
@@ -45,7 +45,7 @@ export function effect(fn: any, options: any = {}) {
 
 const targetMap = new Map()
 export function track(target: any, key: any) {
-    if(!isTracking())return 
+    if (!isTracking()) return
     let depsMap = targetMap.get(target)
     if (!depsMap) {
         depsMap = new Map()
@@ -56,12 +56,16 @@ export function track(target: any, key: any) {
         dep = new Set()
         depsMap.set(key, dep)
     }
-    if(dep.has(activeEffect))return 
+    trackEffect(dep)
+}
+
+export function trackEffect(dep: any) {
+    if (dep.has(activeEffect)) return
     dep.add(activeEffect)
     activeEffect.deps.push(dep)
 }
 
-function isTracking(){
+export function isTracking() {
     return activeEffect && shouldTrack !== false
 }
 
@@ -70,7 +74,10 @@ export function trigger(target: any, key: any) {
     if (!depsMap) return
     const dep = depsMap.get(key)
     if (!dep) return
+    triggerEffect(dep)
+}
 
+export function triggerEffect(dep: any) {
     for (const effect of dep) {
         if (effect.scheduler) {
             effect.scheduler()
