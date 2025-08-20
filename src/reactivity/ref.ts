@@ -3,9 +3,10 @@ import { isTracking, trackEffect, triggerEffect } from "./effect";
 import { reactive } from "./reactive";
 
 class RefImp {
-    private _value: any;
+    private _value: any
     public dep: any
-    private _rawVal: any;
+    private _rawVal: any
+    public _v_is_ref = true
     constructor(val: any) {
         this._rawVal = val
         this._value = convert(val)
@@ -35,4 +36,13 @@ function convert(value: any){
 
 export function ref(val: any) {
     return new RefImp(val)
+}
+
+export function isRef(val: any){
+    return val._v_is_ref
+}
+
+export function unRef(val: any){
+    if(!isRef(val))return val
+    return val._value
 }

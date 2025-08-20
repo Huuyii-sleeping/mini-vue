@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { effect } from "../effect";
-import { ref } from "../ref";
+import { isRef, ref, unRef } from "../ref";
 
 describe('ref',() => {
     it('happy path',() => {
@@ -39,5 +39,12 @@ describe('ref',() => {
         expect(dummy).toBe(3)
         a.value.count = 2
         expect(dummy).toBe(2)
+    })
+    
+    it('isRef',() => {
+        const a = ref(1)
+        expect(isRef(a)).toBe(true)
+        const b = ref(1)
+        expect(unRef(b)).toBe(1)
     })
 })
