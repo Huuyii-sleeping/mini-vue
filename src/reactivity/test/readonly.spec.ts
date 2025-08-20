@@ -20,4 +20,15 @@ describe('readonly',() => {
         expect(user.age).toBe(10)
         expect(console.warn).toBeCalled()
     })
+
+    it('nested readonly',() => {
+        const original = {
+            foo : { bar : 1 },
+            array : [{ bar : 1 }]
+        }
+        const observed = readonly(original)
+        expect(isReadonly(observed.foo)).toBe(true)
+        expect(isReadonly(observed.array)).toBe(true)
+        expect(isReadonly(observed.array[0])).toBe(true)
+    })
 })
