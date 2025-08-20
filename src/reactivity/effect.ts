@@ -3,7 +3,7 @@ import { extend } from "../shared"
 let shouldTrack: any
 let activeEffect: ReactiveEffect
 
-class ReactiveEffect {
+export class ReactiveEffect {
     private _fn: any
     deps: any = []
     active: any = true
