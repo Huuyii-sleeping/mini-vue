@@ -1,7 +1,9 @@
 import { h } from '../../lib/guide-mini-vue.esm.js'
+import { foo } from './foo.js'
 
 window.self = null
 export const App = {
+    name : 'App',
     render() {
         window.self = this
         return h('div', {
@@ -11,9 +13,13 @@ export const App = {
                 console.log('click')
             }
         }, 
-        'hi,' + this.msg
+        // 'hi,' + this.msg
     
-        // [h('p',{ class: 'red'},'hi'),h('p',{ class: 'blue'},'mini-vue')]
+        [h('div',{},'hi'+this.msg),h(foo,{
+            onAdd(){
+                console.log('onAdd')
+            }
+        })]
     )
     },
     setup() {
