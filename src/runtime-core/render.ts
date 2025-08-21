@@ -1,4 +1,5 @@
 import { isObject } from "../shared"
+import { shapeFlags } from "../shared/shapeFlags"
 import { createComponentInstance, setupComponent } from "./component"
 
 export function render(vnode: any, container: any) {
@@ -7,9 +8,10 @@ export function render(vnode: any, container: any) {
 }
 
 function patch(vnode: any, container: any) {
-    if (typeof vnode.type === 'string') {
+    const { shapeFlag } = vnode
+    if (shapeFlag & shapeFlags.ELEMENT) {
         processElement(vnode, container)
-    } else if (isObject(vnode.type)) {
+    } else if (shapeFlag & shapeFlags.STATEFUL_COMPONENT) {
         processComponent(vnode, container)
     }
 }
@@ -19,11 +21,11 @@ function processElement(vnode, container) {
 }
 
 function mountElement(vnode, container) {
-    const el = document.createElement(vnode.type)
-    const { children } = vnode
-    if (typeof children === 'string') {
+    const el = (vnode.el = document.createElement(vnode.type))
+    const { children, shapeFlag } = vnode
+    if (shapeFlag & shapeFlags.TEXT_CHILDREN) {
         el.textContent = children
-    } else if (Array.isArray(children)) {
+    } else if (shapeFlag & shapeFlags.ARRAY_CHILDREN) {
         mountChildren(vnode, el)
     }
     const { props } = vnode
@@ -44,16 +46,17 @@ function processComponent(vnode: any, container: any) {
     mountComponent(vnode, container)
 }
 
-function mountComponent(vnode: any, container: any) {
-    const instance = createComponentInstance(vnode)
+function mountComponent(initalVnode: any, container: any) {
+    const instance = createComponentInstance(initalVnode)
 
     setupComponent(instance)
-    setupRenderEffect(instance, container)
+    setupRenderEffect(instance, initalVnode, container)
 }
 
-function setupRenderEffect(instance: any, container: any) {
+function setupRenderEffect(instance: any, initalVnode, container: any) {
     const { proxy } = instance
     const subTree = instance.render.call(proxy)
     //  vnode tree
     patch(subTree, container)
+    initalVnode.el = subTree.el
 }
