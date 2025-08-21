@@ -11,7 +11,7 @@ export const App = {
         //     footer: h('div', {}, 'footer')
         // })
         const foo = h(Foo, {}, {
-            header: ({age}) => [h('p', {}, 'header' + age),createTextVnode('hello')],
+            header: ({age}) => [h('p', {}, 'header' + age)],
             footer: () =>  h('div', {}, 'footer')
         })
         return h('div', {}, [app, foo])
