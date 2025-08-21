@@ -14,6 +14,12 @@ export function createVnode(type: any, props?: any, children?: any) {
     } else if (Array.isArray(children)) {
         vnode.shapeFlag = vnode.shapeFlag | shapeFlags.ARRAY_CHILDREN
     }
+
+    if(vnode.shapeFlag & shapeFlags.STATEFUL_COMPONENT){
+        if(typeof children === 'object'){
+            vnode.shapeFlag |= shapeFlags.SLOT_CHILDREN
+        }
+    }
     return vnode
 }
 
