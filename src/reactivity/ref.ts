@@ -1,62 +1,65 @@
-import { hasChange, isObject } from "../shared";
-import { isTracking, trackEffect, triggerEffect } from "./effect";
-import { reactive } from "./reactive";
+import { hasChange, isObject } from "../shared"
+import { isTracking, trackEffect, triggerEffect } from "./effect"
+import { reactive } from "./reactive"
 
-class RefImp {
+class RefImpl {
     private _value: any
-    public dep: any
-    private _rawVal: any
-    public _v_is_ref = true
-    constructor(val: any) {
-        this._rawVal = val
-        this._value = convert(val)
+    private _rawValue : any
+    public dep
+    public _v_isRef = true
+    constructor(value) {
+        this._rawValue = value
+        this._value = convert(value)
+        
         this.dep = new Set()
     }
-    get value() {
+    get value() { 
         trackRefValue(this)
         return this._value
     }
     set value(newValue) {
-        if (!hasChange(newValue, this._rawVal)) return
-        this._rawVal = newValue
-        this._value = convert(newValue)
-        triggerEffect(this.dep)
+        if (hasChange(newValue,this._rawValue)) {
+            this._rawValue = newValue
+            this._value = convert(newValue)
+            triggerEffect(this.dep)
+        }
+ 
     }
 }
 
-function trackRefValue(ref: any) {
-    if (isTracking()) {
+function convert(value){
+    return isObject(value) ? reactive(value):value
+}
+
+function trackRefValue(ref){
+    if(isTracking()){
         trackEffect(ref.dep)
     }
+}  
+
+
+export function ref(value) {
+    return new RefImpl(value)
 }
 
-function convert(value: any) {
-    return isObject(value) ? reactive(value) : value
+export function isRef(ref){
+    return !!ref._v_isRef 
 }
 
-export function ref(val: any) {
-    return new RefImp(val)
+export function unRef(ref){
+    return isRef(ref) ? ref.value : ref
 }
 
-export function isRef(val: any) {
-    return val._v_is_ref
-}
-
-export function unRef(val: any) {
-    if (!isRef(val)) return val
-    return val._value
-}
-
-export function proxyRef(val: any) {
-    return new Proxy(val, {
-        get(target, key) {
-            return unRef(Reflect.get(target, key))
+export function proxyRefs(objectWithRef){
+    return new Proxy(objectWithRef,{
+        get(target,key){
+            return unRef(Reflect.get(target,key))
         },
-        set(target: any, key: any, val: any) {
-            if (isRef(target[key]) && !isRef(val)) {
-                return target[key].value = val
-            } else {
-                return Reflect.set(target, key, val)
+        set(target,key,value){
+            if(isRef(target[key]) && !isRef(value)){
+                return target[key].value = value
+            }else{
+                return Reflect.set(target,key,value)
             }
         }
     })
