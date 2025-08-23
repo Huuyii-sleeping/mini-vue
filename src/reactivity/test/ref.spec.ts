@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { effect } from "../effect";
-import { isRef, proxyRef, ref, unRef } from "../ref";
+import { isRef, proxyRefs, ref, unRef } from "../ref";
 
 describe('ref',() => {
     it('happy path',() => {
@@ -53,7 +53,7 @@ describe('ref',() => {
             age : ref(10),
             name : 'xiaoming'
         }
-        const proxyUser = proxyRef(user)
+        const proxyUser = proxyRefs(user)
         expect(user.age.value).toBe(10)
         expect(proxyUser.age).toBe(10)
         expect(proxyUser.name).toBe('xiaoming')
