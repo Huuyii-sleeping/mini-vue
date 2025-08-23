@@ -119,9 +119,81 @@ export function createRender(options) {
         }
         if (i > e1) {
             if (i <= e2) {
-                const nextPos = i + 1
-                const anchor = nextPos > c2.length ? null : c2[nextPos].el
-                patch(null, c2[i], container, parentComponent, anchor)
+                const nextPos = e2 + 1
+                const anchor = nextPos < c2.length ? c2[nextPos].el : null
+                while (i <= e2) {
+                    patch(null, c2[i], container, parentComponent, anchor)
+                    i++
+                }
+            }
+        } else if (i > e2) {
+            while (i <= e1) {
+                hostRemove(c1[i].el)
+                i++
+            }
+        } else {
+            let s1 = i
+            let s2 = i
+
+            let toBePatched = e2 - s2 + 1
+            let patched = 0
+            const keyToNewIndexMap = new Map()
+            const newIndexToldIndexMap = new Array(toBePatched)
+            let move = false
+            let maxNewIndexSoFar = 0
+            for (let i = 0; i < toBePatched; i++)newIndexToldIndexMap[i] = 0
+
+            for (let i = s2; i <= e2; i++) {
+                const nextChild = c2[i]
+                keyToNewIndexMap.set(nextChild.key, i)
+            }
+            for (let i = s1; i <= e1; i++) {
+                const prevChild = c1[i]
+                if (patched >= toBePatched) {
+                    hostRemove(prevChild.el)
+                    continue
+                }
+                let newIndex
+                if (prevChild.key !== null) {
+                    newIndex = keyToNewIndexMap.get(prevChild.key)
+                } else {
+                    for (let j = s2; j < e2; j++) {
+                        if (isSameVnodeType(prevChild, c2[j])) {
+                            newIndex = j
+                            break
+                        }
+                    }
+                }
+                if (newIndex === undefined) {
+                    hostRemove(prevChild.el)
+                } else {
+                    if (newIndex >= maxNewIndexSoFar) {
+                        maxNewIndexSoFar = newIndex
+                    } else {
+                        move = true
+                    }
+                    newIndexToldIndexMap[newIndex - s2] = i + 1
+                    patch(prevChild, c2[newIndex], container, parentComponent, null)
+                    patched++
+                }
+            }
+            const increacingNewIndexSequence = move ? getSequence(newIndexToldIndexMap) : []
+            let j = increacingNewIndexSequence.length - 1
+            for (let i = toBePatched - 1; i >= 0; i--) {
+                const nextIndex = i + s2
+                const nextChild = c2[nextIndex]
+                const anchor = nextIndex + 1 < c2.length ? c2[nextIndex + 1].el : null
+
+                if (newIndexToldIndexMap[i] === 0) { // new child
+                    patch(null, nextChild, container, parentComponent, anchor)
+                }
+
+                if (j < 0 || i !== increacingNewIndexSequence[j]) {
+                    console.log('移动位置')
+                    hostInsert(nextChild.el, container, anchor)
+                } else {
+                    j--
+                }
             }
         }
     }
@@ -210,5 +282,39 @@ export function createRender(options) {
     }
 }
 
+function getSequence(nums) {
+    if (nums.length === 0) return []
+
+    const dp = []
+    const prevIndices = new Array(nums.length).fill(-1)
+
+    for (let i = 0; i < nums.length; i++) {
+        let left = 0, right = dp.length
+        while (left < right) {
+            const mid = Math.floor((left + right) / 2)
+            if (nums[dp[mid]] < nums[i]) {
+                left = mid + 1
+            } else right = mid
+        }
+
+        if (left === dp.length) {
+            dp.push(i as never)
+        } else {
+            dp[left] = i as never
+        }
+
+        if (left > 0) {
+            prevIndices[i] = dp[left - 1]
+        }
+    }
+
+    const res = []
+    let current = dp[dp.length - 1]
+    while (current !== -1) {
+        res.push(current)
+        current = prevIndices[current] as never
+    }
+    return res.reverse()
+}
 
 
