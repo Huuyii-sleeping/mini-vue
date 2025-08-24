@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { baseParse } from "../parse";
-import { NodeTypes } from "../ast";
+import { baseParse } from "../src/parse";
+import { NodeTypes } from "../src/ast";
 
 describe('parse', () => {
     describe('interpolation', () => {

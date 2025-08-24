@@ -16,7 +16,7 @@ export function createComponentInstance(vnode: any, parent: any) {
         parent,
         provides: parent ? parent.provides : {},
         isMounted: false,
-        next : null
+        next: null
     }
     component.emit = emit.bind(null, component) as any
     return component
@@ -52,6 +52,11 @@ function handlerSetupResult(instance: any, setupResult: any) {
 
 function finishComponentSetup(instance: any) {
     const Component = instance.type
+    if (complier && !(Component.render)) {
+        if (Component.template) {
+            Component.render = complier(Component.template)
+        }
+    }
     instance.render = Component.render
 }
 
@@ -62,4 +67,9 @@ export function getCurrentInstance() {
 
 function setCurrentInstance(instance) {
     currentInstance = instance
+}
+
+let complier
+export function registerRuntimeComplier(_complier) {
+    complier = _complier
 }

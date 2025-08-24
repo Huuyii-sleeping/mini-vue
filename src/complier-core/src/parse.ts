@@ -130,6 +130,7 @@ function createParseContent(content) {
 
 function createRoot(children) {
     return {
-        children
+        children,
+        type : NodeTypes.ROOT
     }
 }

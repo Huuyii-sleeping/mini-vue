@@ -1,7 +1,7 @@
 export { h } from './h'
 export { renderSlots } from './renderSlots'
 export { createTextVnode } from './vnode'
-export { getCurrentInstance } from './component'
+export { getCurrentInstance,registerRuntimeComplier } from './component'
 export { provide,inject } from './apiInject'
 export { createRender } from './render'
 export { nextTick } from './scheduler'

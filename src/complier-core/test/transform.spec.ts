@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { baseParse } from "../parse";
-import { transform } from "../transform";
-import { NodeTypes } from "../ast";
+import { baseParse } from "../src/parse";
+import { transform } from "../src/transform";
+import { NodeTypes } from "../src/ast";
 
 describe('transform',() => {
     it('happy path',() => {
